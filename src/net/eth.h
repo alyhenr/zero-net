@@ -14,11 +14,11 @@
 // TODO 1: Define the Ethernet Header Struct
 // It must contain: Destination MAC, Source MAC, and EtherType.
 // It MUST be exactly 14 bytes in memory. Apply the packed attribute.
-struct  __attribute__((packed)) eth_hdr {
-    uint8_t* mac_dest[ETH_ALEN];
-    uint8_t* mac_src[ETH_ALEN];
-    short ether_type;
-};
+struct eth_hdr {
+    uint8_t mac_dest[ETH_ALEN];
+    uint8_t mac_src[ETH_ALEN];
+    uint16_t ether_type;
+} __attribute__((packed));
 
 void eth_rcv(uint8_t *frame, uint32_t len);
 

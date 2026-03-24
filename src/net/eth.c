@@ -5,9 +5,12 @@
 // TODO 3: Implement a helper function to format and print MAC addresses
 // A MAC address is an array of 6 bytes. Print it as XX:XX:XX:XX:XX:XX
 static void print_mac(const uint8_t *mac) {
-    // ... your implementation here
-    printf("%x\n", *mac);
+    for (int i = 0; i < ETH_ALEN; i++) {
+        printf("%02x%s", mac[i], (i < 5) ? ":" : "");
+    }
+    printf("\n");
 }
+
 
 
 // TODO 2: Implement the receive function
@@ -15,22 +18,21 @@ static void print_mac(const uint8_t *mac) {
 // It should cast the byte array to an eth_hdr, print the Source and Destination MACs,
 // and print the EtherType (identifying if it's IPv4 or ARP).
 void eth_rcv(uint8_t *frame, uint32_t len) {
-    printf("[Lenght of frame]: %d\n", len);
-    struct eth_hdr e;
-    // TODO 4: Cast the 'frame' pointer to your 'struct eth_hdr'
-    for (int i = 0; i < ETH_ALEN; ++i) {
-        e.mac_dest[(ETH_ALEN-1) - i] = &frame[i];
-    }
-    
-    for (int i = ETH_ALEN; i < 2*ETH_ALEN; ++i) {
-        e.mac_src[(2*ETH_ALEN - 1) - i] = &frame[i];
-    }
+    if (len < sizeof(struct eth_hdr)) return; // Safety check
 
-    // TODO 5: Print the Source MAC, Destination MAC
-    printf("[SOURCE]: \n");
-    print_mac(e.mac_src[0]);
-    printf("[DESTINATION]: \n");
-    print_mac(e.mac_dest[0]);
-    // TODO 6: Extract the ethertype. Convert it from Network Byte Order 
-    // to Host Byte Order using ntohs(). Print whether it is an IPv4 or ARP packet.
+    struct eth_hdr *e = (struct eth_hdr *)frame;
+
+    printf("[SOURCE]: ");
+    print_mac(e->mac_src); // Pass the pointer, not one byte
+
+    printf("[DESTINATION]: ");
+    print_mac(e->mac_dest);
+
+    // TODO 6: EtherType
+    uint16_t ethertype = ntohs(e->ether_type);
+    if (ethertype == ETH_P_IPV4) {
+        printf("Packet: IPv4\n");
+    } else if (ethertype == ETH_P_ARP) {
+        printf("Packet: ARP\n");
+    }
 }
